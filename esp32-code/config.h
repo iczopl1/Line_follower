@@ -16,16 +16,22 @@
 #define DEBUG
 #define Serial_speed 115200
 
-//globalne wartości co się zmieniają
+// Extern variables - definitions are in esp32-code.ino
 extern float Kp;
 extern float Ki;
 extern float Kd;
-
 extern float MaxSpeed;
 extern float BaseSpeed;
 extern float TurnSpeed;
 extern float lost_threshold;
-
+extern int lastError;
+extern int rightMotorSpeed;
+extern int leftMotorSpeed;
+extern int last_sighted;
+extern int lost;
+extern int last_detection_time;
 extern int ready;
+extern uint16_t sensorValues[NUM_SENSORS];
+extern QTRSensors qtr;
 
 #endif

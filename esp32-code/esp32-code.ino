@@ -54,10 +54,10 @@ void setup()
   pidInit(pid, Kp, Ki, Kd);
   pixels.begin();
   motor_init();
-  //przekazanie funkcji w tym pliku by uniknąć kopiowania danych
-  comunication_init(); // Call without arguments
+  comunication_init(); // init komunikacji patrz na odpowiedni plik bl lub wifi
   //ustawienia sensorów 
   qtr.setTypeAnalog();
+  //na odwrót kolejność
   // qtr.setSensorPins((const uint8_t[]){ 7, 4, 5, 10, 6, 8, 3, 9}, NUM_SENSORS);
   qtr.setSensorPins((const uint8_t[]){ 9, 3, 8, 6, 10, 5, 4, 7}, NUM_SENSORS);
   qtr.setEmitterPin(EMITTER_PIN);
@@ -86,6 +86,7 @@ if (sensorValues[0] >= 800 && sensorValues[NUM_SENSORS-1] < 800) {
       pixels.show();
     }
   } 
+
   //sprawdzenie zgubienia robota
   lost_sensors = 0;
   lost = 0;
@@ -100,6 +101,7 @@ if (sensorValues[0] >= 800 && sensorValues[NUM_SENSORS-1] < 800) {
 
   // Regulator PID. Error nalezy ustawić w zalezności od ilości czujników np. dla 6 czujników max pozycja to 5000 dlatego srodek linii to 2500 a dla 8 czujników max pozycja to 7000 więc środek linii to 3500
   int error = position - 3500;
+  
   //liczenie dt 
   unsigned long now = millis();
   float dt = (now - lastPidTime) / 1000.0;
@@ -125,9 +127,7 @@ if (sensorValues[0] >= 800 && sensorValues[NUM_SENSORS-1] < 800) {
     String pos = "Position: " + String(position);
     com_send(pos.c_str());
     com_send("!");
-    #ifdef DEBUG
-    Serial.print(pos);
-    #endif
+    
     request_sensorsRaw();
   }
 
