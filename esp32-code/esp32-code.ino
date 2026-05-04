@@ -1,6 +1,5 @@
 #include <QTRSensors.h>
 #include <Adafruit_NeoPixel.h>
-#include <functional>
 //bibloteki w folderze
 #include "pid.h"
 #include "motor_driver.h"
@@ -56,7 +55,7 @@ void setup()
   pixels.begin();
   motor_init();
   //przekazanie funkcji w tym pliku by uniknąć kopiowania danych
-  comunication_init(calibrate, request_sensorsRaw, request_params);
+  comunication_init(); // Call without arguments
   //ustawienia sensorów 
   qtr.setTypeAnalog();
   // qtr.setSensorPins((const uint8_t[]){ 7, 4, 5, 10, 6, 8, 3, 9}, NUM_SENSORS);
@@ -152,45 +151,4 @@ if (sensorValues[0] >= 800 && sensorValues[NUM_SENSORS-1] < 800) {
     //stoi bo nie uruchomony
     motor_control(0, 0);
   }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Funkcja kalibracji. "C" jest uywane przez aplikację na telefonie do określenia czy kalibracja się skończyła
-void calibrate(){
-  qtr.resetCalibration();
-  for (uint16_t i = 0; i < 400; i++){
-    qtr.calibrate();
-  }
-  for (uint8_t i = 0; i < NUM_SENSORS; i++){
-    com_send(String(qtr.calibrationOn.minimum[i]));
-    #ifdef DEBUG
-    Serial.print(String(qtr.calibrationOn.minimum[i]));
-    Serial.print(' ');
-    #endif
-  }
-  com_send("C");
-  com_send("C");
-  com_send("C");
-}
-// Wysyła wartości kazdego czujnika do aplikacji
-void request_sensorsRaw(){
-  String sensors = "Sensor ";
-  for (uint8_t i = 0; i < NUM_SENSORS; i++)
-  {
-    sensors += String(sensorValues[i]) + " ";
-  }
-  sensors += "Last: " + String(last_sighted) + " Lost: " + String(lost);
-  #ifdef DEBUG
-  Serial.print(sensors);
-  #endif
-  com_send(sensors);
-}
-// Wysyła aktualne parametry do aplikacji
-void request_params(){
-  String params = "Kp: " + String(Kp) + " Ki: " + String(Ki) + " Kd: " + String(Kd) + " Max: " + String(MaxSpeed) + " Base: " + String(BaseSpeed) + " Turn: " + String(TurnSpeed) + " Lost_th: " + String(lost_threshold);
-  #ifdef DEBUG
-  Serial.println(params);
-  #endif
-  com_send(params);
 }
