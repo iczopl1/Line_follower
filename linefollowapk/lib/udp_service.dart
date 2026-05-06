@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:udp/udp.dart';
 
@@ -19,7 +20,7 @@ class UdpService {
   Future<bool> startListening(String listenAddress, int listenPort) async {
     try {
       _sender = await UDP.bind(Endpoint.any(port: Port(listenPort)));
-      _receiverSubscription = _sender?.asStream(maxChunkSize: 1024).listen((Datagram? datagram) {
+      _receiverSubscription = _sender?.asStream().listen((Datagram? datagram) {
         if (datagram != null) {
           final message = String.fromCharCodes(datagram.data);
           _messageController.add(message);
@@ -53,8 +54,6 @@ class UdpService {
     } else {
       _connectionStatusController.add(true); // Still connected
     }
-    // Optionally send a heartbeat message if needed, but not strictly required for just monitoring
-    // sendMessage('HEARTBEAT', someRemoteAddress, someRemotePort);
   }
 
   Future<bool> sendMessage(String message, String remoteAddress, int remotePort) async {
@@ -65,7 +64,10 @@ class UdpService {
     }
     try {
       var data = Uint8List.fromList(message.codeUnits);
-      await _sender?.send(data, Endpoint.unicast(Uri.parse(remoteAddress), port: Port(remotePort)));
+      await _sender?.send(
+        data,
+        Endpoint.unicast(InternetAddress(remoteAddress), port: Port(remotePort)),
+      );
       return true;
     } catch (e) {
       _messageController.addError('Error sending UDP message: $e');

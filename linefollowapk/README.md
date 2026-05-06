@@ -27,45 +27,36 @@ Aplikacja do sterowania robotem typu linefollow
 
 ## Current Development Status
 
+**Aplikacja uruchamia się bez błędów, ale nie przetestowano jeszcze komunikacji z rzeczywistym robotem.**
+
 ### Completed Tasks
 
 *   **Project Setup:**
     *   Initialized Flutter project and updated `main.dart` to use a custom `HomePage`.
     *   Added `udp` package for UDP communication.
     *   Added `shared_preferences` package for data persistence.
+    *   Fixed compilation errors in `main.dart` and `udp_service.dart`.
+    *   Added necessary Android permissions (`INTERNET`, `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`) to `AndroidManifest.xml`.
 *   **PID Configuration Management:**
     *   Created `PidParameters` data model (`lib/pid_parameters.dart`).
     *   Implemented `PidConfigManager` for saving, loading, and managing up to 5 PID configurations (`lib/pid_config_manager.dart`).
     *   Integrated PID configuration selectors and save/load functionality into `HomePage`.
 *   **UDP Communication Integration:**
     *   Created `UdpService` to handle UDP send/receive, including connection status and heartbeat logic (`lib/udp_service.dart`).
-    *   Integrated `UdpService` into `HomePage`, including:
-        *   UI for entering robot IP, robot port, and app listen port.
-        *   "Start Comms" and "Stop Comms" buttons.
-        *   Display of connection status and last received message.
-        *   Automatic retry mechanism (3 attempts) on disconnection with notifications.
-        *   Placeholder for `_robotLastKnownState` and logic to detect robot restarts/state changes based on "ROBOT_STATUS:" messages.
+    *   Integrated `UdpService` into `HomePage`.
 *   **Sensor Visualization:**
-    *   Added state variables `_rawSensorValues` and `_lineDetectionStatus` to `HomePage` to store sensor data.
-    *   Implemented parsing logic in `_messageSubscription` for "SENSORS:" (raw values) and "LINE:" (line detection) messages.
-    *   Created `_buildSensorVisualization()` to visually display raw sensor values and line detection status (circles changing color).
+    *   Implemented UI and parsing logic for raw sensor values and line detection status.
 *   **Debugging Values Display:**
-    *   Added `_debuggingValues` state variable to `HomePage`.
-    *   Implemented parsing logic in `_messageSubscription` for "DEBUG:" messages to update `_debuggingValues`.
-    *   Integrated a section to display `_debuggingValues` in the UI.
+    *   Implemented section to display debug messages from the robot.
 
 ### Remaining Tasks
 
 *   **Complete Control Button Functionality:**
-    *   Implement the full functionality for all 9 control buttons, including "Start Calib", "Start Robot", "Stop Robot", "Reset Robot", and "Reset App". Currently, only "Start Comms", "Stop Comms", "Send Params", and "Request Params" have basic integration with UDP.
+    *   Implement the full functionality for all 9 control buttons.
 *   **Robot Restart/Value Loss Check Refinement:**
-    *   Refine the logic for checking robot restarts and lost values. This requires specific messages from the robot that indicate its status and whether its stored values have been reset. The current implementation is a placeholder.
-*   **PID Parameter Handling:**
-    *   Implement logic to update the PID parameter input fields when parameters are requested from the robot and received via UDP.
-*   **Android Compatibility Testing:**
-    *   Thoroughly test the application on an Android device to ensure full compatibility and proper functionality.
-*   **Error Handling and UI Feedback:**
-    *   Enhance error handling and provide more detailed UI feedback for various scenarios (e.g., failed send, invalid IP/port).
+    *   Refine the logic for checking robot restarts and lost values.
+*   **Physical Device Testing:**
+    *   Test UDP communication on a real Android device and Linux with the actual robot hardware.
 
 ## Robot Communication Standard for Debugging
 
@@ -103,11 +94,5 @@ All debugging messages should start with a specific prefix followed by a colon a
     *   **Message:** `REQ_PID`
     *   **Purpose:** App sends this to the robot to request its current PID parameters.
 *   **Send Parameters:**
-    *   **Message:** `SET_PID:<json_string_of_pid_parameters>`
-    *   **Purpose:** App sends this to the robot to set new PID parameters. The JSON string should correspond to the `PidParameters` class structure.
-    *   **Example (JSON for PidParameters):**
-        ```json
-        {"kp":1.2,"ki":0.1,"kd":0.5,"max":255.0,"base":100.0,"turn":50.0,"lostTh":500.0}
-        ```
-
-This detailed communication standard will ensure a clear interface between the robot firmware and the Flutter application, facilitating robust debugging and control.
+    *   **Message:** `SET_PID:<kp>,<ki>,<kd>,<max>,<base>,<turn>,<lostTh>`
+    *   **Purpose:** App sends this to the robot to set new PID parameters.
